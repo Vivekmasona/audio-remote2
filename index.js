@@ -12,24 +12,20 @@ app.post('/control', (req, res) => {
     const { action, value, sessionId } = req.body;
 
     if (!sessions[sessionId]) {
-        return res.status(400).json({ error: 'Invalid session ID' });
+        sessions[sessionId] = { url: '', status: 'stop', volume: 100, action: null, value: null };
     }
 
-    if (action === 'play' || action === 'pause' || action === 'stop' || action === 'volume') {
-        sessions[sessionId].status = action;
-        if (action === 'volume') {
-            sessions[sessionId].volume = value;
-        }
-    }
+    sessions[sessionId].action = action;
+    sessions[sessionId].value = value;
 
-    res.json({ status: 'Button click received', action });
+    res.json({ status: 'Command received', action, value, sessionId });
 });
 
 app.post('/update-url', (req, res) => {
     const { url, sessionId } = req.body;
 
     if (!sessions[sessionId]) {
-        sessions[sessionId] = { url: '', status: 'stop', volume: 100 };
+        sessions[sessionId] = { url: '', status: 'stop', volume: 100, action: null, value: null };
     }
 
     sessions[sessionId].url = url;
@@ -48,7 +44,9 @@ app.get('/current-url/:sessionId', (req, res) => {
         sessionId,
         url: sessions[sessionId].url,
         status: sessions[sessionId].status,
-        volume: sessions[sessionId].volume
+        volume: sessions[sessionId].volume,
+        action: sessions[sessionId].action,
+        value: sessions[sessionId].value
     });
 });
 
